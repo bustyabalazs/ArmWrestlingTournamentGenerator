@@ -18,7 +18,7 @@ class Competition:
     def addCategoryFromExcel():
         pass
     
-    def addCompetitionFromExcel():
+    def loadCompetitionFromExcel():
         pass
 
 class Match:
