@@ -11,9 +11,18 @@ from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import (
     QApplication, QDialog, QDialogButtonBox, QFormLayout, QLineEdit,
     QVBoxLayout, QToolBar, QStatusBar, QMainWindow, QLabel, QCheckBox,
-    QMenu
+    QMenu, QHBoxLayout, QPushButton, QWidget
 
 )
+
+#class CategoryWindow(QWidget):
+    
+    # def __init__(self):
+    #     super().__init__()
+    #     layout = QVBoxLayout()
+    #     self.label = QLabel("Another Window")
+    #     layout.addWidget(self.label)
+    #     self.setLayout(layout)
 
 
 class MainWindow(QMainWindow):
@@ -23,6 +32,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("My App")
 
+        #infos about the app, about the editor and support possibilities (credit card info)
         label = QLabel("Hello!")
 
         # The `Qt` namespace has a lot of attributes to customize
@@ -72,8 +82,17 @@ class MainWindow(QMainWindow):
         # file_submenu.addAction(button_action2)
 
 
-    def createNewCompetetion(self):
-        pass
+    def createNewCompetetionLayout(self):
+        # Create a QHBoxLayout instance
+        layout = QHBoxLayout()
+        # Add widgets to the layout
+        layout.addWidget(QPushButton("Left-Most"))
+        layout.addWidget(QPushButton("Center"), 1)
+        layout.addWidget(QPushButton("Right-Most"), 2)
+        # Set the layout on the application's window
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
     
     def loadCompetetionFromFile(self):
         pass
