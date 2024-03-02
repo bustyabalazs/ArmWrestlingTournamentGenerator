@@ -39,8 +39,11 @@ class Bracket:
         self.matches.append(match)
 
 class Category:
-    def __init__(self, name, competitors, matches, bracket):
-        self.name = name
+    def __init__(self, age, weight, hand, gender, competitors, matches, bracket):
+        self.age = age
+        self.weight = weight
+        self.hand = hand
+        self.gender = gender
         self.competitors = competitors
         self.matches = matches
         self.bracket = bracket
