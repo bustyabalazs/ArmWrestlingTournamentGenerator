@@ -1,3 +1,11 @@
+import json
+from json import JSONEncoder
+
+class EncodeStudent(JSONEncoder): 
+        def default(self, o): 
+            return o.__dict__ 
+        
+
 class Competitor:
     def __init__(self, name, category, country, email):
         self.name = name
@@ -6,14 +14,32 @@ class Competitor:
         self.email = email
 
 class Competition:
-    def __init__(self, name, date, competitors, categories):
+    def __init__(self, name, date, competitors, categories, tables):
         self.name = name
         self.date = date
         self.competitors = competitors
         self.categories = categories
+        self.tables = tables
+
+    def __init__(self, dict):
+        self.name = dict['name']
+        self.date = dict['date']
+        self.competitors = dict['competitors']
+        self.categories = dict['categories']
+        self.tables = dict['tables']
 
     def addCategory(self, category):
         self.competitors.append(category)
+
+    def saveCompetition(self):
+        with open( self.name + '.json', 'w') as fp:
+            json.dump(self, fp, indent = 4, cls = EncodeStudent)
+
+
+    def loadCompetition(fileName):
+        with open( fileName, 'r') as fp:
+            competition = Competition(json.loads(fp.read()))
+        return competition
 
     def addCategoryFromExcel():
         pass
