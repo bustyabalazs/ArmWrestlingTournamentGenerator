@@ -1,7 +1,9 @@
 import json
 from json import JSONEncoder
 
-class EncodeStudent(JSONEncoder): 
+import bisect
+
+class EncodeCompetition(JSONEncoder): 
         def default(self, o): 
             return o.__dict__ 
         
@@ -14,7 +16,8 @@ class Competitor:
         self.email = email
 
 class Competition:
-    def __init__(self, name, date, competitors, categories, tables):
+    def __init__(self, fileName, name, date, competitors, categories, tables):
+        self.fileName = fileName
         self.name = name
         self.date = date
         self.competitors = competitors
@@ -22,24 +25,32 @@ class Competition:
         self.tables = tables
 
     def __init__(self, dict):
+        self.fileName = dict['fileName']
         self.name = dict['name']
         self.date = dict['date']
-        self.competitors = dict['competitors']
-        self.categories = dict['categories']
-        self.tables = dict['tables']
+        self.competitors = []
+        for competitor in dict['competitors']:
+            self.competitors.append(Competitor(competitor['name'], competitor['category'], competitor['country'], competitor['email']))
+        self.categories = []
+        for category in dict['categories']:
+            bisect.insort(self.categories, createCategoryFromDict(category)) 
+        self.tables = []
+        for table in dict['tables']:
+            self.tables.append(table)
+        
 
     def addCategory(self, category):
         self.competitors.append(category)
 
     def saveCompetition(self):
-        with open( self.name + '.json', 'w') as fp:
-            json.dump(self, fp, indent = 4, cls = EncodeStudent)
+        with open(self.fileName + '.json', 'w') as fp:
+            json.dump(self, fp, indent = 4, cls = EncodeCompetition)
 
 
     def loadCompetition(fileName):
         with open( fileName, 'r') as fp:
-            competition = Competition(json.loads(fp.read()))
-        return competition
+            competition = json.loads(fp.read())
+        return Competition(competition)
 
     def addCategoryFromExcel():
         pass
@@ -48,7 +59,8 @@ class Competition:
         pass
 
 class Match:
-    def __init__(self, competitor1, competitor2, winner):
+    def __init__(self, id, competitor1, competitor2, winner):
+        self.id = id
         self.competitor1 = competitor1
         self.competitor2 = competitor2
         self.winner = winner
@@ -65,17 +77,27 @@ class Bracket:
         self.matches.append(match)
 
 class Category:
-    def __init__(self, age, weight, hand, gender, competitors, matches, bracket):
+    def __init__(self, age, weight, hand, gender, matches, bracket):
         self.age = age
         self.weight = weight
         self.hand = hand
         self.gender = gender
-        self.competitors = competitors
         self.matches = matches
         self.bracket = bracket
 
-    def addCompetitor(self, competitor):
-        self.competitors.append(competitor)
+    def __lt__(self, other):
+        return ((self.age, self.weight, self.hand, self.gender) <
+                (other.age, other.weight, other.hand, other.gender))
+    
+    def toString(self):
+        return self.age + ' ## ' + self.weight + ' ## ' + self.hand + ' ## ' + self.gender
+
     
     def readCategoryFromExcel():
         pass
+
+def createCategoryFromDict(category):
+    matches = []
+    for match in category['matches']:
+        matches.append(Match(match['id'], match['competitor1'], match['competitor2'], match['winner']))
+    return Category(category['age'], category['weight'], category['hand'], category['gender'], matches, category['bracket'])

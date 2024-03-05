@@ -17,6 +17,7 @@ class MainWindow(QMainWindow):
         self.ui.Create.clicked.connect(self.createCompetition)
         self.ui.LoadCompetetion.clicked.connect(self.loadCompetetion)
         self.ui.UpdateCategory.clicked.connect(self.addCategory)
+        self.ui.saveCompetetion.clicked.connect(self.changeCompetetionName)
         
     def hideNewCompetitionLayout(self):
         self.ui.tabWidget.show()
@@ -28,7 +29,7 @@ class MainWindow(QMainWindow):
         date = self.ui.CompetitionDate.text()
         if self.competition != None:
             self.competition.saveCompetition()
-        self.competition = Model.Competition(name, date, [], [], [])
+        self.competition = Model.Competition(name, name, date, [], [], [])
         self.hideNewCompetitionLayout()
         self.updateCompetetionUI()
         self.competition.saveCompetition()
@@ -37,8 +38,7 @@ class MainWindow(QMainWindow):
     def updateCompetetionUI(self):
         self.ui.ChangeName.setText(self.competition.name)
         self.ui.ChangeDate.setText(self.competition.date)
-        for category in self.competition.categories:
-            self.ui.categories_2.addItem(category.__str__())
+        self.updateCategoryList()
         for competitor in self.competition.competitors:
             self.ui.competitors_2.addItem(competitor.__str__())
         for table in self.competition.tables:
@@ -50,8 +50,14 @@ class MainWindow(QMainWindow):
         hand = self.ui.Hand.text()
         gender = self.ui.Gender.text()
         self.competition.categories.append(Model.Category(age, weight, hand, gender, [], [], []))
-        self.ui.categories_2.addItem(self.competition.categories[-1].__str__())
         self.competition.saveCompetition()
+        self.updateCategoryList()
+
+
+    def updateCategoryList(self):
+        self.ui.categories_2.clear()
+        for category in self.competition.categories:
+            self.ui.categories_2.addItem(category.toString())
 
 
     def loadCompetetion(self):
@@ -69,7 +75,9 @@ class MainWindow(QMainWindow):
     def addCompetitor(self):
         pass
 
-    def saveCompetetion(self):
-        pass
+    def changeCompetetionName(self):
+        self.competition.name = self.ui.ChangeName.text()
+        self.competition.date = self.ui.ChangeDate.text()
+        self.competition.saveCompetition()
 
 

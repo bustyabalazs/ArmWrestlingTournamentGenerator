@@ -60,7 +60,7 @@
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="1">
-         <widget class="QLineEdit" name="Name_8">
+         <widget class="QLineEdit" name="ChangeName">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -76,7 +76,7 @@
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QPushButton" name="Create_3">
+         <widget class="QPushButton" name="saveCompetetion">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -130,7 +130,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="Date_8">
+         <widget class="QLineEdit" name="ChangeDate">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -154,9 +154,9 @@
        </layout>
        <zorder>Name_7</zorder>
        <zorder>Date_7</zorder>
-       <zorder>Date_8</zorder>
-       <zorder>Create_3</zorder>
-       <zorder>Name_8</zorder>
+       <zorder>ChangeDate</zorder>
+       <zorder>saveCompetetion</zorder>
+       <zorder>ChangeName</zorder>
       </widget>
       <widget class="QWidget" name="categories">
        <attribute name="title">
@@ -228,7 +228,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="Name_3"/>
+         <widget class="QLineEdit" name="Name_2"/>
         </item>
         <item row="0" column="2">
          <widget class="QLabel" name="Name_13">
@@ -261,7 +261,7 @@
          <widget class="QLineEdit" name="email"/>
         </item>
         <item row="1" column="4">
-         <widget class="QPushButton" name="UpdateCompetitor">
+         <widget class="QPushButton" name="Update">
           <property name="text">
            <string>Update</string>
           </property>
@@ -285,7 +285,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="TablName"/>
+         <widget class="QLineEdit" name="Name_3"/>
         </item>
         <item row="0" column="2">
          <widget class="QPushButton" name="UpdateTable">
@@ -380,7 +380,7 @@
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QLineEdit" name="Name_2">
+        <widget class="QLineEdit" name="CompetitionDate">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -403,7 +403,7 @@
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QLineEdit" name="Date_2">
+        <widget class="QLineEdit" name="CompetetionName">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -426,7 +426,7 @@
      <x>0</x>
      <y>0</y>
      <width>1125</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
