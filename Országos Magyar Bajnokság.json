@@ -2,40 +2,71 @@
     "fileName": "Orsz\u00e1gos Magyar Bajnoks\u00e1g",
     "name": "Orsz\u00e1gos Magyar Bajnoks\u00e1g",
     "date": "2024.03.23",
-    "competitors": [],
+    "competitors": [
+        {
+            "id": 1,
+            "name": "Bustya Bal\u00e1zs",
+            "category": "",
+            "country": "Hungary",
+            "email": ""
+        }
+    ],
     "categories": [
-        {
-            "age": "senior",
-            "weight": "-70 ",
-            "hand": "right",
-            "gender": "male",
-            "matches": [],
-            "bracket": []
-        },
-        {
-            "age": "senior",
-            "weight": "-86",
-            "hand": "right",
-            "gender": "male",
-            "matches": [],
-            "bracket": []
-        },
-        {
-            "age": "senior",
-            "weight": "-86",
-            "hand": "left",
-            "gender": "male",
-            "matches": [],
-            "bracket": []
-        },
         {
             "age": "senior",
             "weight": "-70",
             "hand": "left",
-            "gender": "male",
+            "gender": "man",
+            "matches": [],
+            "bracket": []
+        },
+        {
+            "age": "senior",
+            "weight": "-70 ",
+            "hand": "right",
+            "gender": "man",
+            "matches": [],
+            "bracket": []
+        },
+        {
+            "age": "senior",
+            "weight": "-86",
+            "hand": "left",
+            "gender": "man",
+            "matches": [],
+            "bracket": []
+        },
+        {
+            "age": "senior",
+            "weight": "-86",
+            "hand": "right",
+            "gender": "man",
+            "matches": [],
+            "bracket": []
+        },
+        {
+            "age": "senior",
+            "weight": "-95",
+            "hand": "left",
+            "gender": "man",
+            "matches": [],
+            "bracket": []
+        },
+        {
+            "age": "senior",
+            "weight": "-95",
+            "hand": "right",
+            "gender": "man",
             "matches": [],
             "bracket": []
         }
     ],
-    "tables": []
+    "tables": [
+        "Table1"
+    ],
+    "countries": [
+        {
+            "name": "Hungary"
+        }
+    ]
 }
