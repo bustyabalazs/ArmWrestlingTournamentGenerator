@@ -6,7 +6,38 @@
         {
             "id": 1,
             "name": "Bustya Bal\u00e1zs",
-            "category": "",
+            "categories": [
+                "senior -70 left man",
+                "senior -70  right man"
+            ],
+            "country": "Hungary",
+            "email": ""
+        },
+        {
+            "id": 3,
+            "name": "Gere D\u00e1vid",
+            "categories": [
+                "senior -70  right man"
+            ],
+            "country": "Hungary",
+            "email": ""
+        },
+        {
+            "id": 2,
+            "name": "Horv\u00e1th Roland",
+            "categories": [
+                "senior -86 left man",
+                "senior -86 right man"
+            ],
+            "country": "Hungary",
+            "email": ""
+        },
+        {
+            "id": 4,
+            "name": "Huber P\u00e9ter",
+            "categories": [
+                "senior -95 left man"
+            ],
             "country": "Hungary",
             "email": ""
         }
@@ -62,11 +93,21 @@
         }
     ],
     "tables": [
-        "Table1"
+        "Table1",
+        "Table2"
     ],
     "countries": [
         {
             "name": "Hungary"
+        },
+        {
+            "name": "Romania"
+        },
+        {
+            "name": "Serbia"
+        },
+        {
+            "name": "Slovakia"
         }
     ]
 }

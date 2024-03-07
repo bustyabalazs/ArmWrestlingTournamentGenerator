@@ -9,15 +9,18 @@ class EncodeCompetition(JSONEncoder):
         
 
 class Competitor:
-    def __init__(self, id, name, category, country, email):
+    def __init__(self, id, name, categories, country, email):
         self.id = id
         self.name = name
-        self.category = category
+        self.categories = categories
         self.country = country
         self.email = email
     
     def toString(self):
-        return self.name + ' ## ' + self.category + ' ## ' + self.country + ' ## ' + self.email
+        categories = ''
+        for category in self.categories:
+            categories += category + ', '
+        return str(self.id)  + ' # ' + self.name + ' # ' + categories + ' # ' + self.country + ' # ' + self.email
     
     def __lt__(self, other):
         return self.name < other.name
@@ -42,7 +45,7 @@ class Competition:
         self.date = dict['date']
         self.competitors = []
         for competitor in dict['competitors']:
-            self.competitors.append(Competitor(competitor['id'], competitor['name'], competitor['category'], competitor['country'], competitor['email']))
+            bisect.insort(self.competitors, createCompetitorFromDict(competitor))
         self.categories = []
         for category in dict['categories']:
             bisect.insort(self.categories, createCategoryFromDict(category)) 
@@ -55,6 +58,12 @@ class Competition:
         
     def addCategory(self, category):
         bisect.insort(self.categories, category)
+
+    def getCategoryList(self):
+        categoryList = []
+        for category in self.categories:
+            categoryList.append(category.toString())
+        return categoryList
 
     def addCompetitor(self, competitor):
         bisect.insort(self.competitors, competitor)
@@ -119,7 +128,7 @@ class Category:
                 (other.age, other.weight, other.hand, other.gender))
     
     def toString(self):
-        return self.age + ' ## ' + self.weight + ' ## ' + self.hand + ' ## ' + self.gender
+        return self.age + ' ' + self.weight + ' ' + self.hand + ' ' + self.gender
 
     
     def readCategoryFromExcel():
@@ -144,3 +153,9 @@ def createCategoryFromDict(category):
     for match in category['matches']:
         matches.append(Match(match['id'], match['competitor1'], match['competitor2'], match['winner']))
     return Category(category['age'], category['weight'], category['hand'], category['gender'], matches, category['bracket'])
+
+def createCompetitorFromDict(competitor):
+    categories = []
+    for category in competitor['categories']:
+        categories.append(category)
+    return Competitor(competitor['id'], competitor['name'], categories, competitor['country'], competitor['email'])

@@ -3,6 +3,9 @@ from Window import Ui_MainWindow
 import Model
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFileDialog
+from PyQt6.QtWidgets import QComboBox
+from PyQt6.QtGui import QStandardItemModel
+from PyQt6.QtWidgets import QLabel
 
 class MainWindow(QMainWindow):
 
@@ -28,6 +31,10 @@ class MainWindow(QMainWindow):
         self.ui.UpdateCountry.clicked.connect(self.addCountry)
         self.ui.Remove_4.clicked.connect(self.removeCountry)
         self.ui.countriesList.itemSelectionChanged.connect(self.updateCountryInputs)
+
+        # setup the checkable combo box for competitors categories
+        self.category_combo_box = CheckableComboBox(parent=self.ui.competitors)  
+        self.ui.gridLayout_4.addWidget(self.category_combo_box, 0, 4, 1, 1)
         
 
         
@@ -54,6 +61,7 @@ class MainWindow(QMainWindow):
         self.updateCategoryList()
         self.updateCompetitorList()
         self.updateTableList()
+        self.updateCountryList()
 
 
     def addCategory(self):
@@ -66,6 +74,12 @@ class MainWindow(QMainWindow):
             self.competition.addCategory(category)
             self.competition.saveCompetition()
             self.updateCategoryList()
+        
+
+    def updateCategoryComboBox(self):  
+        category_list = self.competition.getCategoryList()
+        for category in category_list:
+            self.category_combo_box.addItem(category)
 
 
     def removeCategory(self):
@@ -79,6 +93,7 @@ class MainWindow(QMainWindow):
         self.ui.categories_2.clear()
         for category in self.competition.categories:
             self.ui.categories_2.addItem(category.toString())
+        self.updateCategoryComboBox()
 
 
     def updateCategoryInputs(self):
@@ -92,10 +107,10 @@ class MainWindow(QMainWindow):
 
     def addCompetitor(self):
         name = self.ui.Name_2.text()
-        category = self.ui.Categories.text()
-        country = self.ui.Country.text()
+        categories = self.category_combo_box.chekedItems()
+        country = self.ui.country.currentText()
         email = self.ui.email.text()
-        competitor = Model.Competitor(len(self.competition.competitors), name, category, country, email)
+        competitor = Model.Competitor(len(self.competition.competitors) + 1, name, categories, country, email)
         if competitor not in self.competition.competitors:
             self.competition.addCompetitor(competitor)
             self.competition.saveCompetition()
@@ -113,8 +128,8 @@ class MainWindow(QMainWindow):
         index = self.ui.competitors_2.currentRow()
         competitor = self.competition.competitors[index]
         self.ui.Name_2.setText(competitor.name)
-        self.ui.Categories.setText(competitor.category)
-        self.ui.Country.setText(competitor.country)
+        #self.category_combo_box.setText(competitor.category)
+        self.ui.country.setCurrentText(competitor.country)
         self.ui.email.setText(competitor.email)
 
 
@@ -152,7 +167,7 @@ class MainWindow(QMainWindow):
 
 
     def addCountry(self):
-        country = self.ui.countries_name.text()
+        country = Model.Country(self.ui.countries_name.text())
         if country not in self.competition.countries:
             self.competition.addCountry(country)
             self.competition.saveCompetition()
@@ -169,14 +184,22 @@ class MainWindow(QMainWindow):
     def updateCountryInputs(self):
         index = self.ui.countriesList.currentRow()
         country = self.competition.countries[index]
-        self.ui.countries_name.setText(country)
+        self.ui.countries_name.setText(country.name)
 
 
     def updateCountryList(self):
         self.ui.countriesList.clear()
+        counter = 0
         for country in self.competition.countries:
-            self.ui.countriesList.addItem(country)
+            self.ui.countriesList.addItem(str(counter) + ". " + country.name)
+            counter += 1
+        self.updateCountryComboBox()
     
+
+    def updateCountryComboBox(self):
+        for country in self.competition.countries:
+            self.ui.country.addItem(country.name)
+
 
     def loadCompetetion(self):
         fname = QFileDialog.getOpenFileName(
@@ -196,3 +219,46 @@ class MainWindow(QMainWindow):
         self.competition.saveCompetition()
 
 
+# new check-able combo box 
+class CheckableComboBox(QComboBox): 
+  
+    # constructor 
+    def __init__(self, parent = None): 
+        super(CheckableComboBox, self).__init__(parent) 
+        self.view().pressed.connect(self.handleItemPressed) 
+        self.setModel(QStandardItemModel(self)) 
+
+    count = 0
+    # action called when item get checked 
+    def do_action(self): 
+        pass
+  
+    # when any item get pressed 
+    def handleItemPressed(self, index): 
+  
+        # getting the item 
+        item = self.model().itemFromIndex(index) 
+  
+        # checking if item is checked 
+        if item.checkState() == Qt.CheckState.Checked: 
+  
+            # making it unchecked 
+            item.setCheckState(Qt.CheckState.Unchecked) 
+  
+        # if not checked 
+        else: 
+            # making the item checked 
+            item.setCheckState(Qt.CheckState.Checked) 
+  
+            self.count += 1
+  
+            # call the action 
+            self.do_action() 
+    
+    def chekedItems(self):
+        checked_items = []
+        for i in range(self.model().rowCount()):
+            item = self.model().item(i)
+            if item.checkState() == Qt.CheckState.Checked:
+                checked_items.append(item.text())
+        return checked_items
