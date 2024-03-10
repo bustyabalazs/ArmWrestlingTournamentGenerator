@@ -101,13 +101,85 @@ class Match:
         self.winner = winner
 
 
+
 class Bracket:
-    def __init__(self, name, matches):
+    matchCounter = 1
+    loosers_branch = None
+    next_matches = []
+    finished_matches = []
+
+    def __init__(self, name, category, competitors):
         self.name = name
-        self.matches = matches
+        self.category = category
+        self.winners_branch = competitors
 
     def addMatch(self, match):
-        self.matches.append(match)
+        self.next_matches.append(match)
+        self.matchCounter += 1
+
+    def genBracket(self):
+        bracketNum = self.getBracketNum()
+        matchNum = bracketNum/2
+        numofCompetitors = len(self.winners_branch)
+
+        for i in range (0, matchNum):
+            self.addMatch(Match(self.matchCounter, self.winners_branch[i], None, None))
+            self.winners_branch.remove(self.winners_branch[i])
+        temp = 0
+        for i in range (matchNum, numofCompetitors):
+            if (i-matchNum)%2 == 0:
+                self.next_matches[temp].competitor2 = self.winners_branch[i]
+            else:
+                self.next_matches[temp + matchNum/2].competitor2 = self.winners_branch[i]
+                temp += 1
+            self.winners_branch.remove(self.winners_branch[i])
+            
+
+    def getBracketNum(self):
+        num = len(self.winners_branch)
+        if num <= 2:
+            return 2
+        elif num <= 4:
+            return 4
+        elif num <= 8:
+            return 8
+        elif num <= 16:
+            return 16
+        elif num <= 32:
+            return 32
+        elif num <= 64:
+            return 64
+        elif num <= 128:
+            return 128
+        else:
+            return 0
+    
+    def setWinners(self, match, isComp1Winner):
+        self.finished_matches.append(match)
+        if isComp1Winner:
+            match.winner = match.competitor1
+            self.winners_branch.remove(match.competitor2)
+            self.loosers_branch.append(match.competitor2)
+        else:
+            match.winner = match.competitor2
+            self.winners_branch.remove(match.competitor1)
+            self.loosers_branch.append(match.competitor1)
+        self.next_matches.remove(match)
+        self.genNextMatch(match)
+
+    def genNextMatch(self, match):
+        if self.matchCounter % 2 == 0:
+            self.addMatch(Match(self.matchCounter, None, None, None))
+        else:
+            self.next_matches[self.matchCounter - 1].competitor1 = match.winner 
+    def updateBracket(self):
+        pass
+
+    def decideTableSide(self, match):
+        pass
+
+    def randomSeeding(self):
+        pass
 
 
 class Category:
