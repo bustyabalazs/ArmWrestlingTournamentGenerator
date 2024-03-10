@@ -24,7 +24,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -153,27 +153,6 @@
         <string>categories</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_5">
-        <item row="1" column="8">
-         <widget class="QPushButton" name="Remove_2">
-          <property name="text">
-           <string>Remove</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4">
-         <widget class="QLabel" name="Date_5">
-          <property name="text">
-           <string>Hand:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="8">
-         <widget class="QPushButton" name="UpdateCategory">
-          <property name="text">
-           <string>Update</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="Name_9">
           <property name="text">
@@ -194,6 +173,13 @@
         <item row="0" column="3">
          <widget class="QLineEdit" name="Weight"/>
         </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="Date_5">
+          <property name="text">
+           <string>Hand:</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="5">
          <widget class="QLineEdit" name="Hand"/>
         </item>
@@ -206,6 +192,27 @@
         </item>
         <item row="0" column="7">
          <widget class="QLineEdit" name="Gender"/>
+        </item>
+        <item row="0" column="8">
+         <widget class="QPushButton" name="UpdateCategory">
+          <property name="text">
+           <string>Update</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="6" colspan="2">
+         <widget class="QPushButton" name="Start">
+          <property name="text">
+           <string>Start Selected Category</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="8">
+         <widget class="QPushButton" name="Remove_2">
+          <property name="text">
+           <string>Remove</string>
+          </property>
+         </widget>
         </item>
         <item row="2" column="0" colspan="9">
          <widget class="QListWidget" name="categories_2"/>
@@ -362,42 +369,6 @@
        </sizepolicy>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="8" column="4">
-        <widget class="QPushButton" name="Create">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Create</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="Name">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Name:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4">
-        <widget class="QLineEdit" name="CompetetionName">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
        <item row="7" column="0">
         <widget class="QLabel" name="Date">
          <property name="sizePolicy">
@@ -421,6 +392,16 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="4">
+        <widget class="QLineEdit" name="CompetetionName">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="4">
         <widget class="QLabel" name="createCompetetion">
          <property name="sizePolicy">
@@ -431,6 +412,32 @@
          </property>
          <property name="text">
           <string>Create new competetion</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="Name">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="4">
+        <widget class="QPushButton" name="Create">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Create</string>
          </property>
         </widget>
        </item>

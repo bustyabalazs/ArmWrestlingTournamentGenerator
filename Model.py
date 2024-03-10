@@ -51,7 +51,7 @@ class Competition:
             bisect.insort(self.categories, createCategoryFromDict(category)) 
         self.tables = []
         for table in dict['tables']:
-            self.tables.append(table)
+            self.tables.append(Table(table['name']))
         self.countries = []
         for country in dict['countries']:
             self.countries.append(Country(country['name']))
@@ -111,6 +111,8 @@ class Bracket:
 
 
 class Category:
+    table = None
+    isFree = True
     def __init__(self, age, weight, hand, gender, matches, bracket):
         self.age = age
         self.weight = weight
@@ -147,6 +149,22 @@ class Country:
     
     def toString(self):
         return self.name
+
+class Table:
+    isUsed = False
+    def __init__(self, name):
+        self.name = name
+
+    def toString(self):
+        return self.name
+    
+    def __lt__(self, other):
+        return self.name < other.name
+    
+    def __eq__(self, other):
+        return self.name == other.name
+    
+
 
 def createCategoryFromDict(category):
     matches = []

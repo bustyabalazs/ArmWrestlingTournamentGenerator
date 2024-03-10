@@ -1,11 +1,29 @@
 from PyQt6.QtWidgets import QMainWindow
 from Window import Ui_MainWindow
+from CategoryView import Ui_CategoryView
 import Model
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFileDialog
 from PyQt6.QtWidgets import QComboBox
 from PyQt6.QtGui import QStandardItemModel
 from PyQt6.QtWidgets import QLabel
+
+class CategoryView(QMainWindow):
+    def __init__(self, category, tables):
+        super().__init__()
+        self.ui = Ui_CategoryView()
+        self.ui.setupUi(self)
+        self.category = category
+        self.tables = tables
+        self.updateCategoryUI()
+
+    def updateCategoryUI(self):
+        for table in self.tables:
+            if table.isFree():
+                self.ui.comboBox.addItem(table.name)
+    
+
+    
 
 class MainWindow(QMainWindow):
 
@@ -35,6 +53,8 @@ class MainWindow(QMainWindow):
         # setup the checkable combo box for competitors categories
         self.category_combo_box = CheckableComboBox(parent=self.ui.competitors)  
         self.ui.gridLayout_4.addWidget(self.category_combo_box, 0, 4, 1, 1)
+
+        self.ui.Start.clicked.connect(self.startCategory)
         
 
         
@@ -54,6 +74,10 @@ class MainWindow(QMainWindow):
         self.updateCompetetionUI()
         self.competition.saveCompetition()
 
+    def startCategory(self):
+        categoryIndex = self.ui.categories_2.currentRow()
+        self.catWindow = CategoryView(self.competition.categories[categoryIndex],self.competition.tables)
+        self.catWindow.show()
 
     def updateCompetetionUI(self):
         self.ui.ChangeName.setText(self.competition.name)
@@ -140,7 +164,7 @@ class MainWindow(QMainWindow):
     
 
     def addTable(self):
-        table = self.ui.Table.text()
+        table = Model.Table(self.ui.Table.text())
         if table not in self.competition.tables:
             self.competition.addTable(table)
             self.competition.saveCompetition()
@@ -157,13 +181,13 @@ class MainWindow(QMainWindow):
     def updateTableInputs(self):
         index = self.ui.tables_2.currentRow()
         table = self.competition.tables[index]
-        self.ui.Table.setText(table)
+        self.ui.Table.setText(table.name)
 
     
     def updateTableList(self):
         self.ui.tables_2.clear()
         for table in self.competition.tables:
-            self.ui.tables_2.addItem(table)
+            self.ui.tables_2.addItem(table.toString())
 
 
     def addCountry(self):

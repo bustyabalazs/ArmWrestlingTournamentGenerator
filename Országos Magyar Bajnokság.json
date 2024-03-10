@@ -93,8 +93,15 @@
         }
     ],
     "tables": [
-        "Table1",
-        "Table2"
+        {
+            "name": "Table1"
+        },
+        {
+            "name": "Table2"
+        },
+        {
+            "name": "Table3"
+        }
     ],
     "countries": [
         {
