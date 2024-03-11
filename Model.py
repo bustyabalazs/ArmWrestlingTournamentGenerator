@@ -91,15 +91,18 @@ class Competition:
 
 
 class Match:
-    def __init__(self, id, competitor1, competitor2, winner):
+    def __init__(self, id, competitor1, competitor2, winner, round):
         self.id = id
         self.competitor1 = competitor1
         self.competitor2 = competitor2
         self.winner = winner
+        self.round = round
 
-    def setWinner(self, winner):
-        self.winner = winner
 
+class Round:
+    def __init__(self, matches, competitors):
+        self.competitors = competitors
+        self.matches = matches
 
 
 class Bracket:
@@ -107,11 +110,13 @@ class Bracket:
     loosers_branch = None
     next_matches = []
     finished_matches = []
+    winners_rounds = []
+    loosers_rounds = []
 
     def __init__(self, name, category, competitors):
         self.name = name
         self.category = category
-        self.winners_branch = competitors
+        self.round1Competitors = competitors
 
     def addMatch(self, match):
         self.next_matches.append(match)
@@ -120,23 +125,29 @@ class Bracket:
     def genBracket(self):
         bracketNum = self.getBracketNum()
         matchNum = bracketNum/2
-        numofCompetitors = len(self.winners_branch)
+        numofCompetitors = len(self.round1Competitors)
 
         for i in range (0, matchNum):
-            self.addMatch(Match(self.matchCounter, self.winners_branch[i], None, None))
-            self.winners_branch.remove(self.winners_branch[i])
+            self.addMatch(Match(self.matchCounter, self.round1Competitors[i], None, None, 0))
         temp = 0
         for i in range (matchNum, numofCompetitors):
             if (i-matchNum)%2 == 0:
-                self.next_matches[temp].competitor2 = self.winners_branch[i]
+                self.next_matches[temp].competitor2 = self.round1Competitors[i]
             else:
-                self.next_matches[temp + matchNum/2].competitor2 = self.winners_branch[i]
+                self.next_matches[temp + matchNum/2].competitor2 = self.round1Competitors[i]
                 temp += 1
-            self.winners_branch.remove(self.winners_branch[i])
-            
+        
+        self.genRounds()
 
+    def genRounds(self):
+        for i in range(0, self.getBracketNum()/2+1):
+            self.loosers_rounds.append(Round([], []))
+            # winners branch is half length
+            if i%2:
+                self.winners_rounds.append(Round([], []))
+           
     def getBracketNum(self):
-        num = len(self.winners_branch)
+        num = len(self.round1Competitors)
         if num <= 2:
             return 2
         elif num <= 4:
@@ -153,16 +164,18 @@ class Bracket:
             return 128
         else:
             return 0
+        # Find minimum 'n' such that 2^n >= number of competitors
+        # next_higher_power_of_two = int(math.pow(2, math.ceil(math.log2(len(competitors_list)))))
     
-    def setWinners(self, match, isComp1Winner):
+    def setWinner(self, match, isComp1Winner):
         self.finished_matches.append(match)
         if isComp1Winner:
             match.winner = match.competitor1
-            self.winners_branch.remove(match.competitor2)
+            self.winners_rounds[match.round + 1].competitors.append(match.competitor1)
+            self.loosers_branch
             self.loosers_branch.append(match.competitor2)
         else:
             match.winner = match.competitor2
-            self.winners_branch.remove(match.competitor1)
             self.loosers_branch.append(match.competitor1)
         self.next_matches.remove(match)
         self.genNextMatch(match)

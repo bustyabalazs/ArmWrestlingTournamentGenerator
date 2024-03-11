@@ -1,5 +1,6 @@
 TODO list:
 
+finish set winners method
 add button for starting a category
 create new window for the active category
 create new window with active categories on tables and next matches for projecting
