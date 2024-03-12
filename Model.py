@@ -91,6 +91,8 @@ class Competition:
 
 
 class Match:
+
+    isWinnerBranch = True
     def __init__(self, id, competitor1, competitor2, winner, round):
         self.id = id
         self.competitor1 = competitor1
@@ -123,22 +125,22 @@ class Bracket:
         self.matchCounter += 1
 
     def genBracket(self):
+        self.genRounds()
         bracketNum = self.getBracketNum()
         matchNum = bracketNum/2
         numofCompetitors = len(self.round1Competitors)
-
+        self.winners_rounds[0].competitors = self.round1Competitors
         for i in range (0, matchNum):
-            self.addMatch(Match(self.matchCounter, self.round1Competitors[i], None, None, 0))
+            self.winners_rounds[0].matches[i].append(Match(self.matchCounter, self.round1Competitors[i], None, None, 0))
         temp = 0
         for i in range (matchNum, numofCompetitors):
             if (i-matchNum)%2 == 0:
-                self.next_matches[temp].competitor2 = self.round1Competitors[i]
+                self.winners_rounds[0].matches[temp].competitor2 = self.round1Competitors[i]
             else:
-                self.next_matches[temp + matchNum/2].competitor2 = self.round1Competitors[i]
+                self.winners_rounds[0].matches[temp + matchNum/2].competitor2 = self.round1Competitors[i]
                 temp += 1
+        next_matches = self.winners_rounds[0].matches
         
-        self.genRounds()
-
     def genRounds(self):
         for i in range(0, self.getBracketNum()/2+1):
             self.loosers_rounds.append(Round([], []))
@@ -171,21 +173,47 @@ class Bracket:
         self.finished_matches.append(match)
         if isComp1Winner:
             match.winner = match.competitor1
-            self.winners_rounds[match.round + 1].competitors.append(match.competitor1)
-            self.loosers_branch
-            self.loosers_branch.append(match.competitor2)
         else:
             match.winner = match.competitor2
-            self.loosers_branch.append(match.competitor1)
-        self.next_matches.remove(match)
-        self.genNextMatch(match)
-
-    def genNextMatch(self, match):
+        self.addCompetitorsToNextRound(match)
+        
+        
+    def genNextMatch(self, match, case):
         if self.matchCounter % 2 == 0:
             self.addMatch(Match(self.matchCounter, None, None, None))
         else:
-            self.next_matches[self.matchCounter - 1].competitor1 = match.winner 
-    def updateBracket(self):
+            self.next_matches[self.matchCounter - 1].competitor1 = match.winner
+
+        self.saveBracket()
+
+
+    def addCompetitorsToNextRound(self, match):
+        #if match.winner != None:
+        self.next_matches.remove(match)
+        self.finished_matches.append(match)
+        case = 0
+        if match.isWinnerBranch:
+            case = 1
+            # Adding winner to next round on winners branch
+            self.winners_rounds[match.round + 1].competitors.append(match.winner)
+            self.winners_rounds[match.round].competitors.append(match.winner)
+            # Adding loser to next round on loosers branch
+            if match.round == 0:
+                self.loosers_rounds[match.round + 1].competitors.append(match.looser)
+            else:
+                self.loosers_rounds[2 * match.round].competitors.append(match.looser)
+        else:
+            case = 2
+            # Adding winner to next round on loosers branch
+            self.loosers_rounds[match.round + 1].competitors.append(match.winner)
+        
+        self.genNextMatch(match, case)
+
+
+    def updateBracket(self, match, isComp1Winner):
+        pass
+
+    def saveBracket(self):
         pass
 
     def decideTableSide(self, match):
