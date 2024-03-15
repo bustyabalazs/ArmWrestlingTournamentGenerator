@@ -1,6 +1,8 @@
 TODO list:
 
-finish genNextMatch method
+finish genNextMatchLooserBranch method
+show selected match at the top of the next match list
+after every played match save the bracket
 check competitor number in current round to assume if it is semifinal or final
 add button for starting a category
 create new window for the active category
@@ -14,3 +16,5 @@ merge new competitor into running category
 
 calculate ranking above 4 based on the opponents rankinks
  
+Tesztelés
+Tesztelni 32 emberes táblázatra

@@ -2,6 +2,7 @@ import json
 from json import JSONEncoder
 
 import bisect
+from math import log2
 
 class EncodeCompetition(JSONEncoder): 
         def default(self, o): 
@@ -91,10 +92,12 @@ class Competition:
 
 
 class Match:
-
+    isFinal = False
+    isSemifinal = False
     isWinnerBranch = True
     def __init__(self, id, competitor1, competitor2, winner, round):
-        self.id = id
+        self.id = id[0]
+        id[0] = id[0] + 1
         self.competitor1 = competitor1
         self.competitor2 = competitor2
         self.winner = winner
@@ -108,7 +111,7 @@ class Round:
 
 
 class Bracket:
-    matchCounter = 1
+    matchCounter = [1]
     loosers_branch = None
     next_matches = []
     finished_matches = []
@@ -120,18 +123,15 @@ class Bracket:
         self.category = category
         self.round1Competitors = competitors
 
-    def addMatch(self, match):
-        self.next_matches.append(match)
-        self.matchCounter += 1
-
     def genBracket(self):
-        self.genRounds()
         bracketNum = self.getBracketNum()
+        self.genRounds(bracketNum)        
         matchNum = bracketNum/2
         numofCompetitors = len(self.round1Competitors)
         self.winners_rounds[0].competitors = self.round1Competitors
         for i in range (0, matchNum):
-            self.winners_rounds[0].matches[i].append(Match(self.matchCounter, self.round1Competitors[i], None, None, 0))
+            self.winners_rounds[0].matches[i] = Match(self.matchCounter, self.round1Competitors[i], None, None, 0)
+
         temp = 0
         for i in range (matchNum, numofCompetitors):
             if (i-matchNum)%2 == 0:
@@ -141,12 +141,20 @@ class Bracket:
                 temp += 1
         next_matches = self.winners_rounds[0].matches
         
-    def genRounds(self):
-        for i in range(0, self.getBracketNum()/2+1):
-            self.loosers_rounds.append(Round([], []))
-            # winners branch is half length
+          
+    def genRounds(self, bracketNum):
+        roundNumWinners = log2(bracketNum)
+        roundNumLoosers = roundNumWinners + log2(bracketNum/2)-1
+        # create rounds for winners
+        for i in range(0, roundNumWinners):
+            self.winners_rounds.append(Round([None]*int(bracketNum/(2**i)), [None]*int(bracketNum/(2**(i+1)))))
+        
+        # create rounds for winners
+        for i in range(0, roundNumLoosers):
             if i%2:
-                self.winners_rounds.append(Round([], []))
+                i = i + 1
+            self.loosers_rounds.append(Round([None]*int(bracketNum/(2**i)), [None]*int(bracketNum/(2**(i+1)))))
+    
            
     def getBracketNum(self):
         num = len(self.round1Competitors)
@@ -170,45 +178,62 @@ class Bracket:
         # next_higher_power_of_two = int(math.pow(2, math.ceil(math.log2(len(competitors_list)))))
     
     def setWinner(self, match, isComp1Winner):
-        self.finished_matches.append(match)
+        self.next_matches.remove(match)
         if isComp1Winner:
             match.winner = match.competitor1
         else:
             match.winner = match.competitor2
-        self.addCompetitorsToNextRound(match)
+        self.finished_matches.append(match)
+        if not match.isFinal:
+            self.addCompetitorsToNextRound(match)
         
         
-    def genNextMatch(self, match, case):
-        if self.matchCounter % 2 == 0:
-            self.addMatch(Match(self.matchCounter, None, None, None))
-        else:
-            self.next_matches[self.matchCounter - 1].competitor1 = match.winner
+    def genNextMatchWinnerBranch(self, match):
+        index = self.winners_rounds[match.round].matches.index(match)
+        indexDiv2 = int(index/2)
+        # if the next round is not long enough, add empty matches
+        if len(self.winners_rounds[match.round + 1].matches) < (indexDiv2 + 1):
+            for i in range(0, (indexDiv2 + 1) - len(self.winners_rounds[match.round + 1].matches)):
+                match = Match(self.matchCounter, None, None, None, match.round + 1)  
+                self.winners_rounds[match.round + 1].matches.append(match)
+                self.next_matches.append(match)
 
-        self.saveBracket()
+        if index % 2:
+            self.winners_rounds[match.round + 1].matches[indexDiv2].competitor2 = match.winner
+        else:
+            self.winners_rounds[match.round + 1].matches[indexDiv2].competitor1 = match.winner
+
+
+    def genNextMatchLooserBranch(self, match):
+        if match.round == 0:
+            index = self.loosers_rounds[match.round + 1].matches.index(match)
+            self.loosers_rounds[match.round + 1].matches[index].competitor1 = match.looser
+        else:
+            index = self.loosers_rounds[2 * match.round].matches.index(match)
+            self.loosers_rounds[2 * match.round].matches[index].competitor1 = match.looser
 
 
     def addCompetitorsToNextRound(self, match):
         #if match.winner != None:
-        self.next_matches.remove(match)
-        self.finished_matches.append(match)
-        case = 0
         if match.isWinnerBranch:
-            case = 1
+            index = self.winners_rounds[match.round].matches.index(match)
             # Adding winner to next round on winners branch
-            self.winners_rounds[match.round + 1].competitors.append(match.winner)
-            self.winners_rounds[match.round].competitors.append(match.winner)
+            self.winners_rounds[match.round + 1].competitors[index] = match.winner
+            self.genNextMatchWinnerBranch(match)
             # Adding loser to next round on loosers branch
             if match.round == 0:
                 self.loosers_rounds[match.round + 1].competitors.append(match.looser)
             else:
                 self.loosers_rounds[2 * match.round].competitors.append(match.looser)
         else:
-            case = 2
             # Adding winner to next round on loosers branch
             self.loosers_rounds[match.round + 1].competitors.append(match.winner)
-        
-        self.genNextMatch(match, case)
+        self.genNextMatchLooserBranch(match)
 
+
+    def genRankings(self):
+        #az azonos szinten lévő versenyzőknél figyelembe venni a két vesztes meccs ellenfeleinek eredményét
+        pass
 
     def updateBracket(self, match, isComp1Winner):
         pass
