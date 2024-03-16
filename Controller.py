@@ -16,16 +16,51 @@ class CategoryView(QMainWindow):
         self.category = category
         self.category.bracket = Model.Bracket(competitors)
         self.tables = tables
-        self.updateCategoryUI()
+        self.LoadCategoryUI()
         self.ui.comboBox.currentIndexChanged.connect(self.updateTableSelection)
+        self.ui.listWidget.itemSelectionChanged.connect(self.updateSelectedMatch)
+        self.ui.Player1.clicked.connect(self.setWinnerPlayer1)
+        self.ui.Player1_2.clicked.connect(self.setWinnerPlayer2)
 
-    def updateCategoryUI(self):
+    def setWinnerPlayer1(self):
+        index = self.ui.listWidget.currentRow()
+        match = self.category.bracket.next_matches[index if index > -1 else 0]
+        self.category.bracket.setWinner(match, True)
+        self.updateMatch()
+        # saveCompetetion()
+
+    def setWinnerPlayer2(self):
+        index = self.ui.listWidget.currentRow()
+        match = self.category.bracket.next_matches[index]
+        match.setWinner(match, False)
+        self.updateMatch()
+        # saveCompetetion()
+
+    def LoadCategoryUI(self):
         self.category.bracket.genBracket()
         self.updateTableList()
         self.updateNextMatches()
         self.updateFinishedMatches()
+        self.updateCompetitorList()
+        #self.updateSelectedMatch()
 
-    
+    def updateMatch(self):
+        self.updateNextMatches()
+        self.updateFinishedMatches()
+        self.updateSelectedMatch()
+
+    def updateSelectedMatch(self):
+        index = self.ui.listWidget.currentRow()
+
+        match = self.category.bracket.next_matches[index if index > -1 else 0]
+        self.ui.Player1.setText(match.competitor1.name)
+        self.ui.Player1_2.setText(match.competitor2.name)
+
+    def updateCompetitorList(self):
+        self.ui.listWidget_3.clear()
+        for competitor in self.category.bracket.round1Competitors:
+            self.ui.listWidget_3.addItem(competitor.toString())
+
     def generateBracket(self):
         
         self.updateNextMatches()
@@ -42,12 +77,14 @@ class CategoryView(QMainWindow):
     def updateNextMatches(self):
         self.ui.listWidget.clear()
         for match in self.category.bracket.next_matches:
-            self.ui.listWidget.addItem(match)
+            # modify the second condition to show unfilled matches
+            if (match is not None) and (match.competitor1 is not None and match.competitor2 is not None):
+                self.ui.listWidget.addItem(match.toString())
 
     def updateFinishedMatches(self):
         self.ui.listWidget_2.clear()
         for match in self.category.bracket.finished_matches:
-            self.ui.listWidget.addItem(match)
+            self.ui.listWidget.addItem(match.toString())
     
     def updateTableSelection(self):
         # Free up previous table
@@ -101,8 +138,8 @@ class MainWindow(QMainWindow):
     
 
     def createCompetition(self):
-        name = self.ui.CompetetionName.text()
-        date = self.ui.CompetitionDate.text()
+        name = self.ui.CompetetionName.text().strip()
+        date = self.ui.CompetitionDate.text().strip
         if self.competition != None:
             self.competition.saveCompetition()
         self.competition = Model.Competition(name, name, date, [], [], [])
@@ -113,7 +150,7 @@ class MainWindow(QMainWindow):
 
     def startCategory(self):
         categoryIndex = self.ui.categories_2.currentRow()
-        competitors =self.competition.getCompetitorsInCategory(self.competition.categories[categoryIndex])
+        competitors = self.competition.getCompetitorsInCategory(self.competition.categories[categoryIndex])
         if len(competitors) > 1 : 
             self.catWindow = CategoryView(self.competition.categories[categoryIndex],self.competition.tables, competitors)
             self.catWindow.show()
@@ -129,10 +166,10 @@ class MainWindow(QMainWindow):
 
 
     def addCategory(self):
-        age = self.ui.Age.text()
-        weight = self.ui.Weight.text()
-        hand = self.ui.Hand.text()
-        gender = self.ui.Gender.text()
+        age = self.ui.Age.text().strip()
+        weight = self.ui.Weight.text().strip()
+        hand = self.ui.Hand.text().strip()
+        gender = self.ui.Gender.text().strip()
         category = Model.Category(age, weight, hand, gender, [], [])
         if category not in self.competition.categories:
             self.competition.addCategory(category)
@@ -170,10 +207,10 @@ class MainWindow(QMainWindow):
 
 
     def addCompetitor(self):
-        name = self.ui.Name_2.text()
-        categoriesString = self.category_combo_box.chekedItems()
-        country = self.ui.country.currentText()
-        email = self.ui.email.text()
+        name = self.ui.Name_2.text().strip()
+        categoriesString = self.category_combo_box.chekedItems().strip()
+        country = self.ui.country.currentText().strip()
+        email = self.ui.email.text().strip()
         competitor = Model.Competitor(len(self.competition.competitors) + 1, name, categoriesString, country, email)
         if competitor not in self.competition.competitors:
             self.competition.addCompetitor(competitor)
@@ -204,7 +241,7 @@ class MainWindow(QMainWindow):
     
 
     def addTable(self):
-        table = Model.Table(self.ui.Table.text())
+        table = Model.Table(self.ui.Table.text().strip())
         if table not in self.competition.tables:
             self.competition.addTable(table)
             self.competition.saveCompetition()
@@ -231,7 +268,7 @@ class MainWindow(QMainWindow):
 
 
     def addCountry(self):
-        country = Model.Country(self.ui.countries_name.text())
+        country = Model.Country(self.ui.countries_name.text().strip())
         if country not in self.competition.countries:
             self.competition.addCountry(country)
             self.competition.saveCompetition()
@@ -278,8 +315,8 @@ class MainWindow(QMainWindow):
         
 
     def changeCompetetionName(self):
-        self.competition.name = self.ui.ChangeName.text()
-        self.competition.date = self.ui.ChangeDate.text()
+        self.competition.name = self.ui.ChangeName.text().strip()
+        self.competition.date = self.ui.ChangeDate.text().strip()
         self.competition.saveCompetition()
 
 
@@ -324,5 +361,5 @@ class CheckableComboBox(QComboBox):
         for i in range(self.model().rowCount()):
             item = self.model().item(i)
             if item.checkState() == Qt.CheckState.Checked:
-                checked_items.append(item.text())
+                checked_items.append(item.text().strip())
         return checked_items

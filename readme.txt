@@ -1,6 +1,8 @@
 TODO list:
 
-
+Mark semifinals and final on the UI create final match from semifinals(final of winners and final of loosers)
+save bracket after every match
+play automatically matches with 1 competitor
 show selected match at the top of the next match list
 after every played match save the bracket
 check competitor number in current round to assume if it is semifinal or final

@@ -46,7 +46,7 @@
             "name": "Ormos Lajos",
             "categories": [
                 "senior -70 left man",
-                "senior -70  right man"
+                "senior -70 right man"
             ],
             "country": "Hungary",
             "email": ""
@@ -63,7 +63,7 @@
         },
         {
             "age": "senior",
-            "weight": "-70 ",
+            "weight": "-70",
             "hand": "right",
             "gender": "man",
             "matches": [],
