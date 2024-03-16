@@ -9,18 +9,54 @@ from PyQt6.QtGui import QStandardItemModel
 from PyQt6.QtWidgets import QLabel
 
 class CategoryView(QMainWindow):
-    def __init__(self, category, tables):
+    def __init__(self, category, tables, competitors):
         super().__init__()
         self.ui = Ui_CategoryView()
         self.ui.setupUi(self)
         self.category = category
+        self.category.bracket = Model.Bracket(competitors)
         self.tables = tables
         self.updateCategoryUI()
+        self.ui.comboBox.currentIndexChanged.connect(self.updateTableSelection)
 
     def updateCategoryUI(self):
+        self.category.bracket.genBracket()
+        self.updateTableList()
+        self.updateNextMatches()
+        self.updateFinishedMatches()
+
+    
+    def generateBracket(self):
+        
+        self.updateNextMatches()
+        self.updateFinishedMatches()
+
+    def updateTableList(self):
+        self.ui.comboBox.clear()
         for table in self.tables:
-            if table.isFree():
+            if table.runningCategory is None:
                 self.ui.comboBox.addItem(table.name)
+            elif table.runningCategory == self.category:
+                self.ui.comboBox.addItem(table.name)
+    
+    def updateNextMatches(self):
+        self.ui.listWidget.clear()
+        for match in self.category.bracket.next_matches:
+            self.ui.listWidget.addItem(match)
+
+    def updateFinishedMatches(self):
+        self.ui.listWidget_2.clear()
+        for match in self.category.bracket.finished_matches:
+            self.ui.listWidget.addItem(match)
+    
+    def updateTableSelection(self):
+        # Free up previous table
+        for table in self.tables:
+            if table.runningCategory is not None and table.runningCategory == self.category:
+                table.runningCategory = None
+
+        index = self.ui.comboBox.currentIndex()
+        self.tables[index].runningCategory = self.category
     
 
     
@@ -74,10 +110,14 @@ class MainWindow(QMainWindow):
         self.updateCompetetionUI()
         self.competition.saveCompetition()
 
+
     def startCategory(self):
         categoryIndex = self.ui.categories_2.currentRow()
-        self.catWindow = CategoryView(self.competition.categories[categoryIndex],self.competition.tables)
-        self.catWindow.show()
+        competitors =self.competition.getCompetitorsInCategory(self.competition.categories[categoryIndex])
+        if len(competitors) > 1 : 
+            self.catWindow = CategoryView(self.competition.categories[categoryIndex],self.competition.tables, competitors)
+            self.catWindow.show()
+
 
     def updateCompetetionUI(self):
         self.ui.ChangeName.setText(self.competition.name)
@@ -98,7 +138,7 @@ class MainWindow(QMainWindow):
             self.competition.addCategory(category)
             self.competition.saveCompetition()
             self.updateCategoryList()
-        
+
 
     def updateCategoryComboBox(self):  
         category_list = self.competition.getCategoryList()
@@ -131,10 +171,10 @@ class MainWindow(QMainWindow):
 
     def addCompetitor(self):
         name = self.ui.Name_2.text()
-        categories = self.category_combo_box.chekedItems()
+        categoriesString = self.category_combo_box.chekedItems()
         country = self.ui.country.currentText()
         email = self.ui.email.text()
-        competitor = Model.Competitor(len(self.competition.competitors) + 1, name, categories, country, email)
+        competitor = Model.Competitor(len(self.competition.competitors) + 1, name, categoriesString, country, email)
         if competitor not in self.competition.competitors:
             self.competition.addCompetitor(competitor)
             self.competition.saveCompetition()

@@ -3,6 +3,7 @@ from json import JSONEncoder
 
 import bisect
 from math import log2
+import math
 
 class EncodeCompetition(JSONEncoder): 
         def default(self, o): 
@@ -28,6 +29,7 @@ class Competitor:
 
     def __eq__(self, other):
         return self.name == other.name
+        
 
 
 class Competition:
@@ -75,6 +77,13 @@ class Competition:
     def addCountry(self, country):
         bisect.insort(self.countries, country)
 
+    def getCompetitorsInCategory(self, category):
+        competitors = []
+        for competitor in self.competitors:
+            if category in competitor.categories:
+                competitors.append(competitor)
+        return competitors
+
     def saveCompetition(self):
         with open(self.fileName + '.json', 'w') as fp:
             json.dump(self, fp, indent = 4, cls = EncodeCompetition)
@@ -84,6 +93,14 @@ class Competition:
             competition = json.loads(fp.read())
         return Competition(competition)
 
+
+    def getCategoriesByNames(self, categories):
+        categoryList = []
+        for category in self.categories:
+            if category.toString() in categories:
+                categoryList.append(category)
+        return categoryList
+                                                                                                             
     def addCategoryFromExcel():
         pass
     
@@ -112,21 +129,18 @@ class Round:
 
 class Bracket:
     matchCounter = [1]
-    loosers_branch = None
     next_matches = []
     finished_matches = []
     winners_rounds = []
     loosers_rounds = []
 
-    def __init__(self, name, category, competitors):
-        self.name = name
-        self.category = category
+    def __init__(self, competitors):
         self.round1Competitors = competitors
 
     def genBracket(self):
         bracketNum = self.getBracketNum()
         self.genRounds(bracketNum)        
-        matchNum = bracketNum/2
+        matchNum = int(bracketNum/2)
         numofCompetitors = len(self.round1Competitors)
         self.winners_rounds[0].competitors = self.round1Competitors
         for i in range (0, matchNum):
@@ -143,39 +157,39 @@ class Bracket:
         
           
     def genRounds(self, bracketNum):
-        roundNumWinners = log2(bracketNum)
-        roundNumLoosers = roundNumWinners + log2(bracketNum/2)-1
+        roundNumWinners = int(log2(bracketNum))
+        roundNumLoosers = roundNumWinners + int(log2(bracketNum/2))-1
         # create rounds for winners
         for i in range(0, roundNumWinners):
             self.winners_rounds.append(Round([None]*int(bracketNum/(2**i)), [None]*int(bracketNum/(2**(i+1)))))
         
-        # create rounds for winners
+        # create rounds for loosers
         for i in range(0, roundNumLoosers):
             if i%2:
-                i = i + 1
+                i = i - 1
             self.loosers_rounds.append(Round([None]*int(bracketNum/(2**i)), [None]*int(bracketNum/(2**(i+1)))))
     
            
     def getBracketNum(self):
-        num = len(self.round1Competitors)
-        if num <= 2:
-            return 2
-        elif num <= 4:
-            return 4
-        elif num <= 8:
-            return 8
-        elif num <= 16:
-            return 16
-        elif num <= 32:
-            return 32
-        elif num <= 64:
-            return 64
-        elif num <= 128:
-            return 128
-        else:
-            return 0
+        # num = len(self.round1Competitors)
+        # if num <= 2:
+        #     return 2
+        # elif num <= 4:
+        #     return 4
+        # elif num <= 8:
+        #     return 8
+        # elif num <= 16:
+        #     return 16
+        # elif num <= 32:
+        #     return 32
+        # elif num <= 64:
+        #     return 64
+        # elif num <= 128:
+        #     return 128
+        # else:
+        #     return 0
         # Find minimum 'n' such that 2^n >= number of competitors
-        # next_higher_power_of_two = int(math.pow(2, math.ceil(math.log2(len(competitors_list)))))
+        return int(math.pow(2, math.ceil(math.log2(len(self.round1Competitors)))))
     
     def setWinner(self, match, isComp1Winner):
         self.next_matches.remove(match)
@@ -192,11 +206,11 @@ class Bracket:
         index = self.winners_rounds[match.round].matches.index(match)
         indexDiv2 = int(index/2)
         # if the next round is not long enough, add empty matches
-        if len(self.winners_rounds[match.round + 1].matches) < (indexDiv2 + 1):
-            for i in range(0, (indexDiv2 + 1) - len(self.winners_rounds[match.round + 1].matches)):
-                match = Match(self.matchCounter, None, None, None, match.round + 1)  
-                self.winners_rounds[match.round + 1].matches.append(match)
-                self.next_matches.append(match)
+        # if len(self.winners_rounds[match.round + 1].matches) < (indexDiv2 + 1):
+        #     for i in range(0, (indexDiv2 + 1) - len(self.winners_rounds[match.round + 1].matches)):
+        #         match = Match(self.matchCounter, None, None, None, match.round + 1)  
+        #         self.winners_rounds[match.round + 1].matches.append(match)
+        #         self.next_matches.append(match)
 
         if index % 2:
             self.winners_rounds[match.round + 1].matches[indexDiv2].competitor2 = match.winner
@@ -205,29 +219,34 @@ class Bracket:
 
 
     def genNextMatchLooserBranch(self, match):
-        if match.round == 0:
-            index = self.loosers_rounds[match.round + 1].matches.index(match)
-            self.loosers_rounds[match.round + 1].matches[index].competitor1 = match.looser
+        index = self.loosers_rounds[match.round].matches.index(match)
+        indexDiv2 = int(index/2)
+        if index % 2:
+            self.loosers_rounds[match.round + 1].matches[indexDiv2].competitor2 = match.looser
         else:
-            index = self.loosers_rounds[2 * match.round].matches.index(match)
-            self.loosers_rounds[2 * match.round].matches[index].competitor1 = match.looser
+            self.loosers_rounds[match.round + 1].matches[indexDiv2].competitor1 = match.looser
 
 
+    def invertPosition(center, position):
+        return center + (position - center)
+    
     def addCompetitorsToNextRound(self, match):
         #if match.winner != None:
+        index = self.winners_rounds[match.round].matches.index(match)
         if match.isWinnerBranch:
-            index = self.winners_rounds[match.round].matches.index(match)
             # Adding winner to next round on winners branch
             self.winners_rounds[match.round + 1].competitors[index] = match.winner
             self.genNextMatchWinnerBranch(match)
             # Adding loser to next round on loosers branch
             if match.round == 0:
-                self.loosers_rounds[match.round + 1].competitors.append(match.looser)
-            else:
-                self.loosers_rounds[2 * match.round].competitors.append(match.looser)
+                self.loosers_rounds[match.round].competitors[index] = match.looser
+            elif match.round % 2:
+                center = int(len(self.loosers_rounds[2 * match.round - 1].competitors)/2)
+                invPos = self.invertPosition(center, index)
+                self.loosers_rounds[2 * match.round - 1].competitors[invPos] = match.looser
         else:
             # Adding winner to next round on loosers branch
-            self.loosers_rounds[match.round + 1].competitors.append(match.winner)
+            self.loosers_rounds[match.round + 1].competitors[index] = match.winner
         self.genNextMatchLooserBranch(match)
 
 
@@ -267,9 +286,13 @@ class Category:
         return ((self.age, self.weight, self.hand, self.gender) ==
                 (other.age, other.weight, other.hand, other.gender))
     
+    def __eq__(self, other):
+        return self.toString() == other
+
+    
     def toString(self):
         return self.age + ' ' + self.weight + ' ' + self.hand + ' ' + self.gender
-
+                             
     
     def readCategoryFromExcel():
         pass
@@ -289,7 +312,7 @@ class Country:
         return self.name
 
 class Table:
-    isUsed = False
+    runningCategory = None
     def __init__(self, name):
         self.name = name
 

@@ -8,7 +8,7 @@
             "name": "Bustya Bal\u00e1zs",
             "categories": [
                 "senior -70 left man",
-                "senior -70  right man"
+                "senior -70 right man"
             ],
             "country": "Hungary",
             "email": ""
@@ -17,7 +17,7 @@
             "id": 3,
             "name": "Gere D\u00e1vid",
             "categories": [
-                "senior -70  right man"
+                "senior -70 right man"
             ],
             "country": "Hungary",
             "email": ""
@@ -37,6 +37,16 @@
             "name": "Huber P\u00e9ter",
             "categories": [
                 "senior -95 left man"
+            ],
+            "country": "Hungary",
+            "email": ""
+        },
+        {
+            "id": 5,
+            "name": "Ormos Lajos",
+            "categories": [
+                "senior -70 left man",
+                "senior -70  right man"
             ],
             "country": "Hungary",
             "email": ""

@@ -1,6 +1,6 @@
 TODO list:
 
-finish genNextMatchLooserBranch method
+
 show selected match at the top of the next match list
 after every played match save the bracket
 check competitor number in current round to assume if it is semifinal or final
