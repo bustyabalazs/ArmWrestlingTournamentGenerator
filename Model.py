@@ -109,9 +109,10 @@ class Competition:
 
 
 class Match:
-    isFinal = False
-    isSemifinal = False
-    def __init__(self, id, competitor1, competitor2, winner, round, isWinnerBranch = True):
+    isWinnersSemifinal = False
+    isLoosersSemifinal = False
+    looser = None
+    def __init__(self, id, competitor1, competitor2, winner, round, isWinnerBranch = True, isFinal = False):
         self.id = id[0]
         id[0] = id[0] + 1
         self.competitor1 = competitor1
@@ -119,25 +120,52 @@ class Match:
         self.winner = winner
         self.round = round
         self.isWinnerBranch = isWinnerBranch
+        self.isFinal = isFinal
+    
+    def setWinner(self, isComp1Winner):
+        if isComp1Winner:
+            self.winner = self.competitor1
+            self.looser = self.competitor2
+        else:
+            self.winner = self.competitor2
+            self.looser = self.competitor1
 
     def toString(self):
         return str(self.id) + ' # ' + ("-----------" if self.competitor1 is None else self.competitor1.name) + ' VS ' \
                 + ("-----------" if self.competitor2 is None else self.competitor2.name) \
-                + ' # ' + ('Winners' if self.isWinnerBranch else 'Loosers') + str(self.round)
+                + ' # ' +  self.roundToString()
 
+    def roundToString(self):
+        return 'Final' if self.isFinal else ('WinnersSemiFinal' if self.isWinnersSemifinal else ('LoosersSemiFinal' if self.isLoosersSemifinal else ('Round: ' + 
+        ('Winners' if self.isWinnerBranch else 'Loosers') + str(self.round))))
+
+    def toStrinGFinished(self):
+        return self.toString() + ("---Winner: " + self.winner.name)
 
 class Round:
     def __init__(self, matches, competitors):
         self.competitors = competitors
         self.matches = matches
 
+class Ranking:
+    def __init__(self, competitor, position):
+        self.competitor = competitor
+        self.position = position
+
+    def __lt__(self, other):
+        return self.position < other.position
+    
+    def toString(self):
+        return str(self.position) + '. ' + self.competitor.name
 
 class Bracket:
-    matchCounter = [1]
+    matchCounter = [0]
     next_matches = []
     finished_matches = []
     winners_rounds = []
     loosers_rounds = []
+    finalMatch = Match([0], None, None, None, 0, isFinal = True)
+    rankings = []
 
     def __init__(self, competitors):
         self.round1Competitors = competitors
@@ -158,16 +186,19 @@ class Bracket:
             else:
                 self.winners_rounds[0].matches[temp + matchNum/2].competitor2 = self.round1Competitors[i]
                 temp += 1
-        self.next_matches = self.winners_rounds[0].matches
+        self.next_matches = self.winners_rounds[0].matches.copy()
+        if matchNum == 1:
+            self.next_matches[0].isWinnersSemifinal = True
+            self.next_matches[0].isLoosersSemifinal = True
         self.advanceBracket()
 
         
     def advanceBracket(self):
         for match in self.next_matches:
             if match.competitor2 is None:
-                self.setWinner(match, True)
+                match.setWinner(True)
             elif match.competitor1 is None:
-                self.setWinner(match, False)
+                match.setWinner(False)
     # advance bracket needs to be callse after looser round 1 and 2
 
     def genRounds(self, bracketNum):
@@ -189,18 +220,40 @@ class Bracket:
         return int(math.pow(2, math.ceil(math.log2(len(self.round1Competitors)))))
     
 
-    def setWinner(self, match, isComp1Winner):
+    def step(self, match, isComp1Winner):
         self.next_matches.remove(match)
-        if isComp1Winner:
-            match.winner = match.competitor1
-        else:
-            match.winner = match.competitor2
+        match.setWinner(isComp1Winner)
         self.finished_matches.append(match)
-        if not match.isFinal:
+
+        # handle finals
+        if match.isFinal:
+            bisect.insort(self.rankings, Ranking(match.looser, self.getRanking(match)))
+            bisect.insort(self.rankings, Ranking(match.winner, self.getRanking(match)))
+        elif match.isWinnersSemifinal and match.isLoosersSemifinal:
+            self.finalMatch.competitor1 = match.winner
+            self.finalMatch.competitor2 = match.looser
+            self.next_matches.append(self.finalMatch)
+        elif match.isWinnersSemifinal:
+            self.finalMatch.competitor1 = match.winner
+            if self.next_matches.count(self.finalMatch) == 0:
+                self.next_matches.append(self.finalMatch)
+        elif match.isLoosersSemifinal:
+            self.finalMatch.competitor2 = match.winner
+            if self.next_matches.count(self.finalMatch) == 0:
+                self.next_matches.append(self.finalMatch)
+            bisect.insort(self.rankings, Ranking(match.looser, self.getRanking(match)))
+        else:
             self.addCompetitorsToNextRound(match)
-        
+
+            
+
     def isWinnersFinalMatch(self, match):
-        return (match.round == len(self.winners_rounds) - 1) if match.isWinnerBranch else (match.round == len(self.loosers_rounds) - 1)
+        return (match.round == len(self.winners_rounds) - 1)
+
+
+    def isLoosersFinalMatch(self, match):
+        return match.round == len(self.loosers_rounds) - 1
+    
 
     def genNextMatchWinnerBranch(self, match):
         index = self.winners_rounds[match.round].matches.index(match)
@@ -213,6 +266,8 @@ class Bracket:
         #         self.next_matches.append(match)
         if self.winners_rounds[match.round + 1].matches[indexDiv2] is None:
             self.winners_rounds[match.round + 1].matches[indexDiv2] = Match(self.matchCounter, None, None, None, match.round + 1)
+            if self.isWinnersFinalMatch(self.winners_rounds[match.round + 1].matches[indexDiv2]):
+                self.winners_rounds[match.round + 1].matches[indexDiv2].isSemifinal = True
             self.next_matches.append(self.winners_rounds[match.round + 1].matches[indexDiv2])
         if index % 2:
             self.winners_rounds[match.round + 1].matches[indexDiv2].competitor2 = match.winner
@@ -222,12 +277,14 @@ class Bracket:
 
     def genNextMatchLooserBranchFromWinners(self, match):
         newMatchRound = 1 if match.round == 1 else 2 * match.round
-        index = self.loosers_rounds[match.round].matches.index(match)
+        index = self.winners_rounds[match.round].matches.index(match)
         indexDiv2 = int(index/2)
         center = int(len(self.loosers_rounds[newMatchRound].competitors)/2)
         invPos = self.invertPosition(center, indexDiv2)
         if self.loosers_rounds[newMatchRound].matches[invPos] is None:
             self.loosers_rounds[newMatchRound].matches[invPos] = Match(self.matchCounter, None, None, None, newMatchRound, False)
+            if self.isLoosersFinalMatch(self.loosers_rounds[newMatchRound].matches[invPos]):
+                self.loosers_rounds[newMatchRound].matches[invPos].isSemifinal = True
             self.next_matches.append(self.loosers_rounds[newMatchRound].matches[invPos])
         if index % 2:
             self.loosers_rounds[newMatchRound].matches[invPos].competitor2 = match.looser
@@ -240,17 +297,22 @@ class Bracket:
         indexDiv2 = int(index/2)
         if self.loosers_rounds[match.round + 1].matches[indexDiv2] is None:
             self.loosers_rounds[match.round + 1].matches[indexDiv2] = Match(self.matchCounter, None, None, None, match.round + 1, False)
+            if self.isLoosersFinalMatch(self.loosers_rounds[match.round + 1].matches[indexDiv2]):
+                self.loosers_rounds[match.round + 1].matches[indexDiv2].isSemifinal = True
             self.next_matches.append(self.loosers_rounds[match.round + 1].matches[indexDiv2])
         if index % 2:
             self.loosers_rounds[match.round + 1].matches[indexDiv2].competitor2 = match.winner
         else:
             self.loosers_rounds[match.round + 1].matches[indexDiv2].competitor1 = match.winner
+        if match.looser is not None:
+            bisect.insort(self.rankings, Ranking(match.looser, self.getRanking(match)))
 
-        #rank looser
+
+    def getRanking(self, match):
+        return len(self.round1Competitors) - len(self.rankings)
 
 
-
-    def invertPosition(center, position):
+    def invertPosition(self, center, position):
         return center + (position - center)
     
 

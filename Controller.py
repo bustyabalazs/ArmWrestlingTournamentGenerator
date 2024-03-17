@@ -19,20 +19,15 @@ class CategoryView(QMainWindow):
         self.LoadCategoryUI()
         self.ui.comboBox.currentIndexChanged.connect(self.updateTableSelection)
         self.ui.listWidget.itemSelectionChanged.connect(self.updateSelectedMatch)
-        self.ui.Player1.clicked.connect(self.setWinnerPlayer1)
-        self.ui.Player1_2.clicked.connect(self.setWinnerPlayer2)
+        self.ui.Player1.clicked.connect(lambda: self.setWinner(True))
+        self.ui.Player1_2.clicked.connect(lambda: self.setWinner(False))
 
-    def setWinnerPlayer1(self):
+    def setWinner(self, isComp1Winner):
+        if len(self.category.bracket.next_matches) == 0:
+            return
         index = self.ui.listWidget.currentRow()
         match = self.category.bracket.next_matches[index if index > -1 else 0]
-        self.category.bracket.setWinner(match, True)
-        self.updateMatch()
-        # saveCompetetion()
-
-    def setWinnerPlayer2(self):
-        index = self.ui.listWidget.currentRow()
-        match = self.category.bracket.next_matches[index]
-        match.setWinner(match, False)
+        self.category.bracket.step(match, isComp1Winner)
         self.updateMatch()
         # saveCompetetion()
 
@@ -42,19 +37,30 @@ class CategoryView(QMainWindow):
         self.updateNextMatches()
         self.updateFinishedMatches()
         self.updateCompetitorList()
-        #self.updateSelectedMatch()
+        self.updateSelectedMatch()
 
     def updateMatch(self):
         self.updateNextMatches()
         self.updateFinishedMatches()
         self.updateSelectedMatch()
+        self.updateRanking()
+
+    def updateRanking(self):
+        self.ui.listWidget_4.clear()
+        for rank in self.category.bracket.rankings:
+            self.ui.listWidget_4.addItem(rank.toString())
 
     def updateSelectedMatch(self):
         index = self.ui.listWidget.currentRow()
-
-        match = self.category.bracket.next_matches[index if index > -1 else 0]
-        self.ui.Player1.setText(match.competitor1.name)
-        self.ui.Player1_2.setText(match.competitor2.name)
+        if len(self.category.bracket.next_matches) > 0:
+            if index < 0:
+                self.ui.listWidget.setCurrentRow(0)
+                index = 0
+            match = self.category.bracket.next_matches[index]
+            self.ui.Player1.setCheckState(Qt.CheckState.Unchecked)
+            self.ui.Player1_2.setCheckState(Qt.CheckState.Unchecked)
+            self.ui.Player1.setText(match.competitor1.name)
+            self.ui.Player1_2.setText(match.competitor2.name)
 
     def updateCompetitorList(self):
         self.ui.listWidget_3.clear()
@@ -75,16 +81,17 @@ class CategoryView(QMainWindow):
                 self.ui.comboBox.addItem(table.name)
     
     def updateNextMatches(self):
-        self.ui.listWidget.clear()
+        self.ui.listWidget.takeItem(self.ui.listWidget.currentRow())
         for match in self.category.bracket.next_matches:
             # modify the second condition to show unfilled matches
             if (match is not None) and (match.competitor1 is not None and match.competitor2 is not None):
                 self.ui.listWidget.addItem(match.toString())
+            self.ui.listWidget.setCurrentRow(0)
 
     def updateFinishedMatches(self):
         self.ui.listWidget_2.clear()
-        for match in self.category.bracket.finished_matches:
-            self.ui.listWidget.addItem(match.toString())
+        for match in reversed (self.category.bracket.finished_matches):
+            self.ui.listWidget_2.addItem(match.toStrinGFinished())
     
     def updateTableSelection(self):
         # Free up previous table

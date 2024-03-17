@@ -1,9 +1,9 @@
 TODO list:
 
-Mark semifinals and final on the UI create final match from semifinals(final of winners and final of loosers)
-save bracket after every match
-play automatically matches with 1 competitor
-show selected match at the top of the next match list
+advance bracket for all round, play automatically matches with 1 competitor
+show rankings on the projection
+add to rankings semifinal and final matches
+show selected match at the top of the next match list on the projection
 after every played match save the bracket
 check competitor number in current round to assume if it is semifinal or final
 add button for starting a category
@@ -20,3 +20,9 @@ calculate ranking above 4 based on the opponents rankinks
  
 Tesztelés
 Tesztelni 32 emberes táblázatra
+
+
+command for ui generation:
+
+pyuic6 -o Window.py View.ui
+pyuic6 -o CategoryView.py CategoryView.ui
