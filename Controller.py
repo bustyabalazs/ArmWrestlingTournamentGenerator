@@ -59,8 +59,20 @@ class CategoryView(QMainWindow):
             match = self.category.bracket.next_matches[index]
             self.ui.Player1.setCheckState(Qt.CheckState.Unchecked)
             self.ui.Player1_2.setCheckState(Qt.CheckState.Unchecked)
-            self.ui.Player1.setText(match.competitor1.name)
-            self.ui.Player1_2.setText(match.competitor2.name)
+            if  match.competitor1 is not None:
+                self.ui.Player1.setText(match.competitor1.name)
+            else:
+                self.ui.Player1.setText("TBD")
+            if  match.competitor2 is not None:
+                self.ui.Player1_2.setText(match.competitor2.name)
+            else:
+                self.ui.Player1_2.setText("TBD")
+        else:
+            self.ui.Player1.setText("")
+            self.ui.Player1_2.setText("")
+            self.ui.Player1.setDisabled(True)
+            self.ui.Player1_2.setDisabled(True)
+
 
     def updateCompetitorList(self):
         self.ui.listWidget_3.clear()

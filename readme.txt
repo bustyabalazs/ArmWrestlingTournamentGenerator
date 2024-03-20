@@ -1,8 +1,9 @@
 TODO list:
 
-advance bracket for all round, play automatically matches with 1 competitor
+fix invers indexing issue on every 2nd round  in genNextMatchLooserBranchFromWinners
+a next_matches be csak olyan meccsek lehetnek benne amiket meg is lehet jelenteni tehát egyik versenyző sem noneType
+advance bracket for all round, play automatically matches with 1 competitor, and generate new matches in the next round
 show rankings on the projection
-add to rankings semifinal and final matches
 show selected match at the top of the next match list on the projection
 after every played match save the bracket
 check competitor number in current round to assume if it is semifinal or final
