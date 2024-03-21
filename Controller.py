@@ -34,10 +34,8 @@ class CategoryView(QMainWindow):
     def LoadCategoryUI(self):
         self.category.bracket.genBracket()
         self.updateTableList()
-        self.updateNextMatches()
-        self.updateFinishedMatches()
+        self.updateMatch()
         self.updateCompetitorList()
-        self.updateSelectedMatch()
 
     def updateMatch(self):
         self.updateNextMatches()
@@ -79,11 +77,6 @@ class CategoryView(QMainWindow):
         for competitor in self.category.bracket.round1Competitors:
             self.ui.listWidget_3.addItem(competitor.toString())
 
-    def generateBracket(self):
-        
-        self.updateNextMatches()
-        self.updateFinishedMatches()
-
     def updateTableList(self):
         self.ui.comboBox.clear()
         for table in self.tables:
@@ -93,10 +86,10 @@ class CategoryView(QMainWindow):
                 self.ui.comboBox.addItem(table.name)
     
     def updateNextMatches(self):
-        self.ui.listWidget.takeItem(self.ui.listWidget.currentRow())
+        self.ui.listWidget.clear()
         for match in self.category.bracket.next_matches:
             # modify the second condition to show unfilled matches
-            if (match is not None) and (match.competitor1 is not None and match.competitor2 is not None):
+            if match is not None:
                 self.ui.listWidget.addItem(match.toString())
             self.ui.listWidget.setCurrentRow(0)
 
@@ -227,7 +220,7 @@ class MainWindow(QMainWindow):
 
     def addCompetitor(self):
         name = self.ui.Name_2.text().strip()
-        categoriesString = self.category_combo_box.chekedItems().strip()
+        categoriesString = self.category_combo_box.chekedItems()
         country = self.ui.country.currentText().strip()
         email = self.ui.email.text().strip()
         competitor = Model.Competitor(len(self.competition.competitors) + 1, name, categoriesString, country, email)

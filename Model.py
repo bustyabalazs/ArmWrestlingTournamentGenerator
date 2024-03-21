@@ -184,7 +184,7 @@ class Bracket:
             if (i-matchNum)%2 == 0:
                 self.winners_rounds[0].matches[temp].competitor2 = self.round1Competitors[i]
             else:
-                self.winners_rounds[0].matches[temp + matchNum/2].competitor2 = self.round1Competitors[i]
+                self.winners_rounds[0].matches[temp + int(matchNum/2)].competitor2 = self.round1Competitors[i]
                 temp += 1
         self.next_matches = self.winners_rounds[0].matches.copy()
         if matchNum == 1:
@@ -217,10 +217,11 @@ class Bracket:
             self.winners_rounds.append(Round([None]*int(bracketNum/(2**(i+1))), [None]*int(bracketNum/(2**i))))
         
         # create rounds for loosers
+        inc = -1
         for i in range(0, roundNumLoosers):
-            if i%2:
-                i = i - 1
-            self.loosers_rounds.append(Round([None]*int(bracketNum/(2**(i+2))), [None]*int(bracketNum/(2**(i+1)))))
+            if i%2 == 0:
+                inc = inc + 1
+            self.loosers_rounds.append(Round([None]*int(bracketNum/(2**(inc+2))), [None]*int(bracketNum/(2**(inc+1)))))
     
            
     def getBracketNum(self):
@@ -239,6 +240,7 @@ class Bracket:
             if match.looser is not None:
                 bisect.insort(self.rankings, Ranking(match.looser, self.getRanking(match)))
             bisect.insort(self.rankings, Ranking(match.winner, self.getRanking(match)))
+            match.id = self.matchCounter[0]
         elif match.isWinnersSemifinal and match.isLoosersSemifinal:
             self.finalMatch.competitor1 = match.winner
             self.finalMatch.competitor2 = match.looser
@@ -290,11 +292,25 @@ class Bracket:
 
 
     def genNextMatchLooserBranchFromWinners(self, f_match):
-        newMatchRound = 1 if f_match.round == 1 else 2 * f_match.round
+        newMatchRound = 1 if f_match.round == 1 else (0 if f_match.round == 0 else 2 * f_match.round - 1)
         index = self.winners_rounds[f_match.round].matches.index(f_match)
-        indexDiv2 = int(index/2)
-        center = int(len(self.loosers_rounds[newMatchRound].competitors)/2)
-        invPos = self.invertPosition(center, indexDiv2)
+        center = int(len(self.loosers_rounds[newMatchRound].matches)/2)
+        invPos = self.invertPosition(center, index)
+        next_match = self.loosers_rounds[newMatchRound].matches[invPos]
+        if next_match is None:
+            next_match = Match(self.matchCounter, None, None, None, newMatchRound, False)
+            if self.isLoosersFinalMatch(next_match):
+                next_match.isLoosersSemifinal = True
+            self.next_matches.append(next_match)
+        next_match.competitor2 = f_match.looser
+        self.loosers_rounds[newMatchRound].matches[invPos] = next_match
+            
+
+    def genNextMatchLooserBranchZeroFromWinners(self, f_match):
+        newMatchRound = 0
+        index = self.winners_rounds[f_match.round].matches.index(f_match)
+        center = int(len(self.loosers_rounds[newMatchRound].matches)/2)
+        invPos = self.invertPosition(center, index)
         next_match = self.loosers_rounds[newMatchRound].matches[invPos]
         if next_match is None:
             next_match = Match(self.matchCounter, None, None, None, newMatchRound, False)
@@ -306,22 +322,23 @@ class Bracket:
             next_match.competitor2 = f_match.looser
         else:
             next_match.competitor1 = f_match.looser
-        chek = 0
-        if chek:
-            print("hey")
-
 
     def genNextMatchLooserBranch(self, f_match):
         index = self.loosers_rounds[f_match.round].matches.index(f_match)
-        indexDiv2 = int(index/2)
-        next_match = self.loosers_rounds[f_match.round + 1].matches[indexDiv2]
+        
+        if f_match.round % 2:
+            index = int(index/2)
+        next_match = self.loosers_rounds[f_match.round + 1].matches[index]
         if next_match is None:
             next_match = Match(self.matchCounter, None, None, None, f_match.round + 1, False)
             if self.isLoosersFinalMatch(next_match):
                 next_match.isLoosersSemifinal = True
             self.next_matches.append(next_match)
-            self.loosers_rounds[f_match.round + 1].matches[indexDiv2] = next_match
-        if index % 2:
+            self.loosers_rounds[f_match.round + 1].matches[index] = next_match
+        # opponent comes from winners branch    
+        if f_match.round % 2:
+            next_match.competitor1 = f_match.winner
+        elif index % 2:      
             next_match.competitor2 = f_match.winner
         else:
             next_match.competitor1 = f_match.winner
@@ -334,7 +351,7 @@ class Bracket:
 
 
     def invertPosition(self, center, position):
-        return center + (position - center)
+        return 0 if center == 0 else center + (center - position) - 1
     
 
     def addCompetitorsToNextRound(self, match):
@@ -348,11 +365,12 @@ class Bracket:
             # Adding loser to next round on loosers branch
             if match.round == 0:
                 self.loosers_rounds[match.round].competitors[index] = match.looser
+                self.genNextMatchLooserBranchZeroFromWinners(match)
             elif match.round % 2:
                 center = int(len(self.loosers_rounds[2 * match.round - 1].competitors)/2)
                 invPos = self.invertPosition(center, index)
                 self.loosers_rounds[2 * match.round - 1].competitors[invPos] = match.looser
-            self.genNextMatchLooserBranchFromWinners(match)
+                self.genNextMatchLooserBranchFromWinners(match)
         else:
             index = self.loosers_rounds[match.round].matches.index(match)
             # Adding winner to next round on loosers branch

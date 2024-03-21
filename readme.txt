@@ -1,6 +1,7 @@
 TODO list:
 
-fix invers indexing issue on every 2nd round  in genNextMatchLooserBranchFromWinners
+TBT-to be the first match, thus nobody will come to the table twice in a row
+matches on loosers branch should be played first 
 a next_matches be csak olyan meccsek lehetnek benne amiket meg is lehet jelenteni tehát egyik versenyző sem noneType
 advance bracket for all round, play automatically matches with 1 competitor, and generate new matches in the next round
 show rankings on the projection
@@ -16,7 +17,7 @@ logic for deciding the table side
 undo
 change result of a match
 merge new competitor into running category
-
+random placement seeding
 calculate ranking above 4 based on the opponents rankinks
  
 Tesztelés
