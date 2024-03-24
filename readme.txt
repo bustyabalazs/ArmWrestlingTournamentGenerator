@@ -1,7 +1,8 @@
 TODO list:
 
+
+előre kigenerálini a meccseket sorrendben (next matches) utólag csak hozzáadni a nyerteseket és veszteseket a megfelelő meccsekhez
 TBT-to be the first match, thus nobody will come to the table twice in a row
-matches on loosers branch should be played first 
 a next_matches be csak olyan meccsek lehetnek benne amiket meg is lehet jelenteni tehát egyik versenyző sem noneType
 advance bracket for all round, play automatically matches with 1 competitor, and generate new matches in the next round
 show rankings on the projection
@@ -19,6 +20,8 @@ change result of a match
 merge new competitor into running category
 random placement seeding
 calculate ranking above 4 based on the opponents rankinks
+csapat pontot számolni
+adatbázisba feltölteni mindent
  
 Tesztelés
 Tesztelni 32 emberes táblázatra
